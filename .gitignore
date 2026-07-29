@@ -1,0 +1,23 @@
+# Environment variables (SECURITY - DO NOT COMMIT)
+.env
+*.env
+
+# Material de estudio / notas locales (excluido explicitamente)
+jupiters/
+
+# Python cache & virtual environments
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# IDE / Operating System files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Output / temporary test files
+*.log
