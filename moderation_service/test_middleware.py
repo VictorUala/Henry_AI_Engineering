@@ -2,8 +2,18 @@
 🧪 Suite de Pruebas Automatizadas con Pytest para el Moderation Middleware
 """
 
+import os
+import sys
 import pytest
-from moderation_service.main import evaluate_moderation
+
+# Ensure imports work cleanly from any execution directory
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+
+try:
+    from moderation_service.main import evaluate_moderation
+except ImportError:
+    from main import evaluate_moderation
 
 def test_bloquea_prompt_privacy_leak_por_encima_del_umbral():
     """Valida que un prompt con contraseña/email devuelva action=bloquear y code=filtracion_de_privacidad."""
