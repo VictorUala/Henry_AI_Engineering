@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any
 
@@ -23,12 +24,14 @@ def log_execution_metrics(
     metrics_file_path: str = "metrics/metrics.json"
 ) -> Dict[str, Any]:
     """
-    Logs per-execution metrics (tokens, latency, cost) into JSON file.
+    Logs per-execution metrics (tokens, latency, cost, request_id) into JSON file.
     """
     total_tokens = prompt_tokens + completion_tokens
     estimated_cost_usd = calculate_estimated_cost(prompt_tokens, completion_tokens)
+    request_id = f"req_{uuid.uuid4().hex[:12]}"
     
     metric_entry = {
+        "request_id": request_id,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "query_preview": query[:60] + "..." if len(query) > 60 else query,
         "model": model,
