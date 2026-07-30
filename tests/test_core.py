@@ -36,14 +36,14 @@ def test_cost_calculation_accuracy():
 def test_json_schema_validation():
     """Test Pydantic schema validation for JSON contract."""
     sample_valid_json = {
-        "category": "Billing",
-        "answer": "You can download invoices from Account -> Billing.",
+        "category": "Facturación",
+        "answer": "Puedes descargar tus facturas desde Cuenta -> Facturación.",
         "confidence": 0.95,
-        "rationale": "Direct invoice download inquiry",
-        "actions": ["Direct user to billing page"]
+        "rationale": "Consulta directa sobre descarga de facturas",
+        "actions": ["Dirigir al usuario a la página de facturación"]
     }
     
     validated = SupportResponseSchema(**sample_valid_json)
-    assert validated.category == "Billing"
+    assert validated.category == "Facturación"
     assert validated.confidence == 0.95
     assert len(validated.actions) == 1

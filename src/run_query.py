@@ -17,8 +17,8 @@ load_dotenv()
 
 # Pydantic schema for output contract validation
 class SupportResponseSchema(BaseModel):
-    category: str = Field(description="Category of the ticket: Billing, Technical, Account, Shipping, General")
-    answer: str = Field(description="Direct, helpful answer to the customer inquiry")
+    category: str = Field(description="Category of the ticket: Facturación, Técnico, Cuenta, Envíos, General")
+    answer: str = Field(description="Direct, helpful answer to the customer inquiry in Spanish")
     confidence: float = Field(ge=0.0, le=1.0, description="Confidence score between 0.0 and 1.0")
     rationale: str = Field(description="Brief explanation of decision reasoning")
     actions: list[str] = Field(description="Recommended downstream actions")
