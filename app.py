@@ -27,14 +27,16 @@ st.set_page_config(
 st.markdown("""
 <style>
     .main-title {
-        font-size: 2.3rem;
-        font-weight: 700;
-        color: #1E293B;
+        font-size: 2.4rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #38BDF8, #818CF8, #C084FC);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         margin-bottom: 0.5rem;
     }
     .sub-title {
         font-size: 1.1rem;
-        color: #64748B;
+        color: #94A3B8;
         margin-bottom: 1.5rem;
     }
     .category-badge {
