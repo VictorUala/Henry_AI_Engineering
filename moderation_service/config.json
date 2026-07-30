@@ -1,0 +1,11 @@
+{
+  "thresholds": {
+    "filtracion_de_privacidad": { "permitir": 0.1, "marcar": 0.3, "bloquear": 0.5 },
+    "acoso": { "permitir": 0.2, "marcar": 0.5, "bloquear": 0.7 },
+    "discurso_de_odio": { "permitir": 0.1, "marcar": 0.4, "bloquear": 0.6 },
+    "contenido_sexual": { "permitir": 0.2, "marcar": 0.5, "bloquear": 0.8 },
+    "default": { "permitir": 0.2, "marcar": 0.5, "bloquear": 0.8 }
+  },
+  "policy_version": "2026-07-30",
+  "thresholds_version": "v1.0"
+}
