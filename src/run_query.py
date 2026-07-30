@@ -54,12 +54,17 @@ def process_customer_query(query: str, model: str = "gpt-4o-mini", temperature: 
             "metrics": metrics
         }
         
-    # 2. Verify API Key
+    # 2. Verify API Key & Initialize Client with Timeout and Retries Backoff
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise ValueError("OPENAI_API_KEY environment variable is not set. Please check your .env file.")
         
-    client = OpenAI(api_key=api_key)
+    # Configure production resilience: explicit 15s timeout and 3 retries backoff
+    client = OpenAI(
+        api_key=api_key,
+        timeout=15.0,
+        max_retries=3
+    )
     system_prompt = load_prompt_template()
     
     messages = [
