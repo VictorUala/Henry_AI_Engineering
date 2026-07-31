@@ -12,7 +12,16 @@ def test_safety_filter_detects_adversarial_input():
     
     assert is_safe is False
     assert fallback is not None
-    assert "Security Policy Alert" in fallback["answer"]
+    assert "Alerta de Política de Seguridad" in fallback["answer"]
+
+def test_safety_filter_detects_pii_leak():
+    """Test that safety module catches raw unmasked credit card or password leaks."""
+    pii_query = "Mi tarjeta de credito es 4500-1234-5678-9010 y mi contraseña=secret123"
+    is_safe, fallback = check_prompt_safety(pii_query)
+    
+    assert is_safe is False
+    assert fallback is not None
+    assert "PRIVACIDAD" in fallback["rationale"]
 
 def test_safety_filter_allows_normal_input():
     """Test that normal customer inquiries pass safety check."""

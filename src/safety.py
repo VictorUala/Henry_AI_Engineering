@@ -1,7 +1,12 @@
-import re
-from typing import Tuple, Dict, Any
+"""
+🛡️ Módulo Avanzado de Seguridad, Moderación y Guardia de Privacidad (No PII)
+Henry AI Engineering - Módulo 1
+"""
 
-# Common adversarial prompt patterns & injection triggers
+import re
+from typing import Tuple, Dict, Any, List
+
+# 1. Patrones Adversariales (Inyecciones de Prompt & Jailbreaks)
 ADVERSARIAL_PATTERNS = [
     r"ignore\s+(all\s+)?(previous|above)\s+(instructions|prompts)",
     r"disregard\s+(your\s+)?(system\s+)?prompt",
@@ -9,26 +14,63 @@ ADVERSARIAL_PATTERNS = [
     r"system\s*:\s*",
     r"you\s+are\s+now\s+a\s+DAN",
     r"jailbreak",
+    r"ignora\s+(las\s+)?instrucciones\s+anteriores",
+    r"muestra\s+(el\s+)?prompt\s+de\s+sistema",
 ]
+
+# 2. Patrones de Filtración de Datos Sensibles (PII: Tarjetas de crédito, Contraseñas en crudo)
+CREDIT_CARD_PATTERN = r'\b(?:\d[ -]*?){13,16}\b'
+SENSITIVE_KEYWORD_PATTERN = r'\b(password|contraseña)\s*[:=]\s*\S+'
 
 def check_prompt_safety(query: str) -> Tuple[bool, Dict[str, Any]]:
     """
-    Scans incoming query for adversarial attacks or system prompt injection.
+    Escanea la consulta entrante buscando inyecciones de prompt, jailbreaks o filtración de PII.
     
     Returns:
-        (is_safe: bool, fallback_response: Dict[str, Any] or None)
+        (is_safe: bool, fallback_response: Dict[str, Any] o None)
     """
     normalized_query = query.lower().strip()
+    reasons: List[Dict[str, str]] = []
+    severity = "baja"
     
+    # Check 1: Inyecciones de Prompt / Adversarial Attacks
     for pattern in ADVERSARIAL_PATTERNS:
         if re.search(pattern, normalized_query, re.IGNORECASE):
-            fallback_response = {
-                "category": "General",
-                "answer": "Security Policy Alert: The query contained restricted instructions or potential prompt injection and cannot be processed.",
-                "confidence": 0.0,
-                "rationale": f"Adversarial pattern detected matching security trigger: '{pattern}'",
-                "actions": ["Log security violation", "Reject adversarial query", "Flag user IP/session"]
-            }
-            return False, fallback_response
+            reasons.append({
+                "code": "prompt_injection",
+                "description": f"Patrón de inyección de prompt detectado: '{pattern}'",
+                "source": "guardia_seguridad"
+            })
+            severity = "alta"
+            break
             
+    # Check 2: Detectar números de tarjeta de crédito sin enmascarar o contraseñas expuestas
+    if re.search(CREDIT_CARD_PATTERN, query) or re.search(SENSITIVE_KEYWORD_PATTERN, normalized_query):
+        reasons.append({
+            "code": "filtracion_de_privacidad",
+            "description": "Se detectó información sensible sin enmascarar (PII: tarjeta o contraseña) en la consulta.",
+            "source": "filtro_privacidad"
+        })
+        if severity != "alta":
+            severity = "media"
+            
+    # Si se detectó alguna violación de seguridad o privacidad
+    if reasons:
+        primary_reason = reasons[0]
+        code = primary_reason["code"]
+        desc = primary_reason["description"]
+        
+        fallback_response = {
+            "category": "General",
+            "answer": "Alerta de Política de Seguridad: La consulta contiene instrucciones restringidas o datos sensibles no permitidos y no puede ser procesada.",
+            "confidence": 0.0,
+            "rationale": f"Bloqueo de seguridad [{code.upper()}] (Severidad: {severity}): {desc}",
+            "actions": [
+                "Registrar violación de política de seguridad",
+                "Rechazar consulta adversarial o con PII sin llamar al LLM",
+                "Flag en log de auditoría sin registrar PII en crudo"
+            ]
+        }
+        return False, fallback_response
+        
     return True, None

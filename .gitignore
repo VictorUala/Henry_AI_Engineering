@@ -2,8 +2,9 @@
 .env
 *.env
 
-# Material de estudio / notas locales (excluido explicitamente)
+# Material de estudio / notas locales / ejercicios de clase (excluidos explícitamente)
 jupiters/
+moderation_service/
 
 # Python cache & virtual environments
 __pycache__/
