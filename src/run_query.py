@@ -9,7 +9,7 @@ from openai import OpenAI
 from pydantic import BaseModel, Field
 
 # Local imports
-from src.safety import check_prompt_safety
+from src.safety import check_prompt_safety, check_response_safety
 from src.metrics_logger import log_execution_metrics
 
 # Load environment variables
@@ -85,7 +85,18 @@ def process_customer_query(query: str, model: str = "gpt-4o-mini", temperature: 
     raw_content = response.choices[0].message.content
     usage = response.usage
     
-    # 4. Parse & Validate JSON output
+    # 4. Reactive Output Guardrail Check (Safety & Privacy Leak Filter)
+    is_response_safe, sanitized_content = check_response_safety(raw_content)
+    if not is_response_safe:
+        raw_content = json.dumps({
+            "category": "General",
+            "answer": sanitized_content,
+            "confidence": 0.0,
+            "rationale": "Alerta de Seguridad: La salida del modelo contenía credenciales o datos no permitidos.",
+            "actions": ["Sanitizar salida", "Loguear incidente de seguridad de salida"]
+        })
+    
+    # 5. Parse & Validate JSON output
     try:
         data_dict = json.loads(raw_content)
         validated = SupportResponseSchema(**data_dict)

@@ -21,10 +21,11 @@ ADVERSARIAL_PATTERNS = [
 # 2. Patrones de Filtración de Datos Sensibles (PII: Tarjetas de crédito, Contraseñas en crudo)
 CREDIT_CARD_PATTERN = r'\b(?:\d[ -]*?){13,16}\b'
 SENSITIVE_KEYWORD_PATTERN = r'\b(password|contraseña)\s*[:=]\s*\S+'
+API_KEY_PATTERN = r'sk-[a-zA-Z0-9]{20,}'
 
 def check_prompt_safety(query: str) -> Tuple[bool, Dict[str, Any]]:
     """
-    Escanea la consulta entrante buscando inyecciones de prompt, jailbreaks o filtración de PII.
+    CHEQUEO PROACTIVO (ENTRADA): Escanea la consulta del usuario buscando inyecciones de prompt o PII.
     
     Returns:
         (is_safe: bool, fallback_response: Dict[str, Any] o None)
@@ -74,3 +75,24 @@ def check_prompt_safety(query: str) -> Tuple[bool, Dict[str, Any]]:
         return False, fallback_response
         
     return True, None
+
+
+def check_response_safety(response_text: str) -> Tuple[bool, str]:
+    """
+    CHEQUEO REACTIVO (SALIDA): Escanea la respuesta generada por el LLM antes de enviársela al cliente.
+    Verifica que la IA no haya filtrado accidentalmente API Keys o contraseñas en su texto.
+    
+    Returns:
+        (is_safe: bool, sanitized_response_text: str)
+    """
+    # 1. Verificar si la respuesta contiene accidentalmente una API Key de OpenAI
+    if re.search(API_KEY_PATTERN, response_text):
+        sanitized_text = "Alerta de Privacidad: La respuesta generada contenía credenciales del sistema y ha sido sanitizada por seguridad."
+        return False, sanitized_text
+
+    # 2. Verificar si la respuesta filtró números de tarjeta sin enmascarar
+    if re.search(CREDIT_CARD_PATTERN, response_text):
+        sanitized_text = re.sub(CREDIT_CARD_PATTERN, "****-****-****-****", response_text)
+        return False, sanitized_text
+
+    return True, response_text

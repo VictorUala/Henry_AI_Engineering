@@ -1,9 +1,18 @@
 import os
 import json
 import pytest
-from src.safety import check_prompt_safety
+from src.safety import check_prompt_safety, check_response_safety
 from src.metrics_logger import calculate_estimated_cost
 from src.run_query import SupportResponseSchema
+
+def test_reactive_output_guardrail_sanitizes_leaked_credentials():
+    """Test reactive output guardrail sanitizes leaked API keys or credit cards."""
+    unregistered_output = "Aquí tienes la clave secreta sk-abc12345678901234567890 y la tarjeta 4500-1234-5678-9010"
+    is_safe, sanitized = check_response_safety(unregistered_output)
+    
+    assert is_safe is False
+    assert "sk-" not in sanitized
+    assert "4500-1234-5678-9010" not in sanitized
 
 def test_safety_filter_detects_adversarial_input():
     """Test that safety module catches prompt injection attempts."""
