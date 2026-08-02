@@ -45,7 +45,7 @@ Developed as the Module 1 Project for **Soy Henry AI Engineering**.
 │   ├── __init__.py
 │   └── test_core.py          # Pytest unit testing suite
 └── reports/
-    └── PI_report_en.md       # Official 1-2 page project report
+    └── PI_report_es.md       # Informe Oficial del Proyecto en Español
 ```
 
 ---

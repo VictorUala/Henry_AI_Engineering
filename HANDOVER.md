@@ -25,7 +25,7 @@
   - **Entrada (Proactivo)**: Intercepta inyecciones de prompt (jailbreaks) y tarjetas de crédito o contraseñas en crudo antes de llamar al LLM (0.34ms, $0 USD).
   - **Salida (Reactivo - `check_response_safety`)**: Sanitiza automáticamente si la IA llegase a filtrar accidentalmente API Keys o tarjetas en su respuesta.
 - [x] `tests/test_core.py`: Suite de 6 pruebas unitarias automatizadas con `pytest` (**6/6 pasadas exitosamente**).
-- [x] `reports/PI_report_en.md`: Informe oficial del proyecto (1-2 páginas en Markdown).
+- [x] `reports/PI_report_es.md`: Informe oficial del proyecto en español (completo y detallado).
 - [x] `README.md`: Documentación completa del proyecto.
 
 ---
