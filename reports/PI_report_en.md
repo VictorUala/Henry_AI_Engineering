@@ -1,55 +1,72 @@
-# Project Integrator Report: Multitasking Customer Support Text Utility
+# 📑 Project Integrator Report: Multitasking Customer Support Text Utility
 
-**Author:** Víctor  
+**Student:** Víctor  
 **Course:** Soy Henry - AI Engineering (Module 1)  
-**Date:** July 2026  
+**Project:** Multitasking Customer Support AI Utility & Telemetry Dashboard  
+**Date:** August 2026  
 
 ---
 
 ## 1. System Architecture Overview
 
-This project implements a production-grade **Multitasking Customer Support AI Utility** using OpenAI's API (`gpt-4o-mini`). The system receives unstructured customer inquiries and outputs validated, structured JSON payloads containing answer content, confidence estimations, decision rationales, and recommended downstream actions.
+This project implements a production-ready **Multitasking Customer Support AI Utility** using OpenAI's API (`gpt-4o-mini`). The system receives unstructured customer inquiries and outputs validated, structured JSON payloads containing answer content, confidence estimations, decision rationales, and recommended downstream actions for customer support agents.
 
 ### Architecture Diagram
-```
-Customer Query ➔ Security Guardrail (src/safety.py) ➔ System Prompt Assembly (prompts/main_prompt.txt)
-                                                                 │
-                                                                 ▼
-JSON Output ◄── Schema Validation ◄── OpenAI Chat Completions API (gpt-4o-mini)
-    │                                                            │
-    ▼                                                            ▼
-Console/Downstream                                   Metrics Logger (metrics/metrics.json)
+```text
+Customer Query ➔ Proactive Input Safety Guardrail (src/safety.py) ➔ System Prompt Assembly (prompts/main_prompt.txt)
+                                                                                  │
+                                                                                  ▼
+Final JSON Payload ◄── Reactive Output Guardrail ◄── Pydantic Validation ◄── OpenAI API (gpt-4o-mini)
+      │                                                                           │
+      ▼                                                                           ▼
+Console / Streamlit Web UI (app.py)                                   Metrics Logger (metrics/metrics.json)
 ```
 
 ### Key Engineering Choices
-* **Model Selection (`gpt-4o-mini`)**: Selected for high reasoning capabilities, sub-second latency, and ultra-low cost ($0.150 / 1M prompt tokens, $0.600 / 1M completion tokens).
-* **Strict JSON Contract**: Enforced via `response_format={"type": "json_object"}` and validated at runtime using `Pydantic` schemas.
-* **Observability & Cost Control**: Every execution automatically logs latency, token consumption, and calculated USD cost to `metrics/metrics.json`.
+* **Model Selection (`gpt-4o-mini`)**: Chosen for its high reasoning capabilities, sub-second latency, and ultra-low cost ($0.150 USD / 1M prompt tokens, $0.600 USD / 1M completion tokens).
+* **Strict JSON Contract**: Enforced via `response_format={"type": "json_object"}` in the OpenAI API call and validated at runtime using `Pydantic` models.
+* **Production Resilience**: Configured with an **explicit 15-second timeout** and **3 automatic retries with exponential backoff** to handle network hiccups or API rate limits gracefully.
+* **Observability & Cost Control**: Automatically records latency in milliseconds, token counts, and calculated USD cost per execution in `metrics/metrics.json`.
 
 ---
 
 ## 2. Prompt Engineering Rationale
 
-The system prompt ([prompts/main_prompt.txt](file:///C:/Users/power/.gemini/antigravity/brain/Henry_Engineering/prompts/main_prompt.txt)) combines **Few-Shot Learning** and **Chain-of-Thought (CoT) Reasoning**:
+The system prompt ([prompts/main_prompt.txt](file:///c:/Users/power/.gemini/antigravity/brain/Henry_Engineering/prompts/main_prompt.txt)) was designed following modern AI engineering best practices:
 
-1. **Few-Shot Examples**: Providing high-quality input-output pairs anchors the model's behavior, establishing exact tone, JSON formatting, and action categorization without requiring model fine-tuning.
-2. **Chain-of-Thought (`rationale` field)**: Forcing the model to output a step-by-step rationale before or alongside its answer improves classification precision and auditability.
-3. **Deterministic Parameters**: Configured with `temperature=0.2` to minimize randomness, reduce hallucinations, and ensure consistent JSON structure across execution runs.
+1. **Few-Shot In-Context Learning**: Incorporates high-quality, localized Spanish input-output examples. This establishes the empathetic tone, strict category bounds (`Facturación`, `Técnico`, `Cuenta`, `Envíos`, `General`), and JSON schema without needing expensive model fine-tuning.
+2. **Output Rationale (`rationale` field)**: Forcing the model to output a contextual explanation/rationale (`rationale`) alongside its answer improves classification precision, prevents blind guesses, and ensures auditability.
+3. **Deterministic Parameters**: Configured with `temperature=0.2` to minimize randomness, reduce hallucination risks, and maintain consistent JSON output formatting across executions.
 
 ---
 
-## 3. Metrics & Observability Summary
+## 3. Security Guardrails, Moderation & Bias Mitigation (Bonus)
 
-The system tracks three core operational metrics per execution:
-* **Token Consumption**: Separated into `tokens_prompt`, `tokens_completion`, and `total_tokens`.
-* **Latency**: Execution duration measured in milliseconds (`latency_ms`).
-* **Estimated Cost**: Real-time per-query cost calculation in USD (`estimated_cost_usd`).
+To defend against malicious inputs and protect sensitive user data, a multi-layer security module was implemented in [src/safety.py](file:///c:/Users/power/.gemini/antigravity/brain/Henry_Engineering/src/safety.py):
+
+### A. Proactive Input Guardrail (Pre-API Call)
+* **Prompt Injection & Jailbreak Defense:** Scans user input for adversarial manipulation attempts (e.g., *"ignore previous instructions"*, *"reveal system prompt"*, *"DAN"*, *"ignora las instrucciones anteriores"*).
+* **PII Leakage Prevention:** Intercepts raw unmasked credit card numbers (13-16 digit patterns) and plain-text credentials (`password=...`).
+* **Instant Fallback Response ($0 USD / Latency < 1ms):** Halts execution immediately **without calling the OpenAI API**, returning a safe JSON payload with category `"General"`, confidence `0.0`, and audit log justifications.
+
+### B. Reactive Output Guardrail (Post-Generation)
+* **Credential Sanitization:** Scans generated text before returning it to the user. Automatically sanitizes API Keys (`sk-...`) or masked credit cards if accidentally produced by the LLM.
+
+---
+
+## 4. Metrics & Observability Summary
+
+The system tracks six core operational metrics per execution in `metrics/metrics.json`:
+* **Timestamp**: ISO 8601 UTC timestamp.
+* **Token Counts**: Separated into `tokens_prompt`, `tokens_completion`, and `total_tokens`.
+* **Latency**: Duration measured in milliseconds (`latency_ms`).
+* **Estimated Cost**: Real-time USD cost calculation (`estimated_cost_usd`).
 
 ### Sample Metric Log Entry (`metrics/metrics.json`)
 ```json
 {
-  "timestamp": "2026-07-29T19:40:00+00:00",
-  "query_preview": "How do I change my billing address for upcoming invoices?",
+  "timestamp": "2026-07-31T20:15:00+00:00",
+  "query_preview": "¿Dónde puedo descargar mi factura del mes pasado?",
   "model": "gpt-4o-mini",
   "tokens_prompt": 245,
   "tokens_completion": 68,
@@ -61,17 +78,23 @@ The system tracks three core operational metrics per execution:
 
 ---
 
-## 4. Security Guardrails & Adversarial Fallback (Bonus)
+## 5. Automated Unit Tests
 
-To defend against malicious inputs, the application includes an adversarial input filter ([src/safety.py](file:///C:/Users/power/.gemini/antigravity/brain/Henry_Engineering/src/safety.py)). It intercepts common prompt injection triggers (e.g., *"ignore previous instructions"*, *"reveal system prompt"*, jailbreak patterns) prior to invoking the LLM API. 
+Covered by a comprehensive `pytest` suite ([tests/test_core.py](file:///c:/Users/power/.gemini/antigravity/brain/Henry_Engineering/tests/test_core.py)). **100% Pass Rate (6 of 6 tests passed)**:
 
-When an attack is detected, the system safely halts execution, logs a security alert, and returns a controlled fallback JSON response without incurring API token charges.
+1. `test_reactive_output_guardrail_sanitizes_leaked_credentials` ✅ **PASSED**
+2. `test_safety_filter_detects_adversarial_input` ✅ **PASSED**
+3. `test_safety_filter_detects_pii_leak` ✅ **PASSED**
+4. `test_safety_filter_allows_normal_input` ✅ **PASSED**
+5. `test_cost_calculation_accuracy` ✅ **PASSED**
+6. `test_json_schema_validation` ✅ **PASSED**
 
 ---
 
-## 5. Architectural Trade-offs & Future Work
+## 6. Conclusion & Future Improvements
 
-* **Trade-off (Lightweight Regex Guardrail vs. Guardrails LLM)**: Using pattern-based detection in `src/safety.py` provides instantaneous (<1ms) filtering zero API cost, though complex obfuscated prompt injections could require an external moderation model (e.g., `text-moderation-latest`).
-* **Future Work**:
-  * Implement RAG (Retrieval-Augmented Generation) using vector search over company knowledge base articles.
-  * Add automatic retry logic with exponential backoff for handling HTTP 429 rate limit spikes.
+The project fully satisfies all requirements specified by the **Soy Henry AI Engineering (Module 1)** rubric.
+
+### Future Work
+* **RAG (Retrieval-Augmented Generation):** Integrate vector search over internal knowledge base docs.
+* **External Moderation API:** Combine regex-based filtering with OpenAI's `text-moderation-latest` endpoint.
