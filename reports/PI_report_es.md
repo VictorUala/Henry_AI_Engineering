@@ -35,7 +35,7 @@ Consola / Interfaz Web (app.py)                                       Registro d
 El prompt del sistema ([prompts/main_prompt.txt](file:///c:/Users/power/.gemini/antigravity/brain/Henry_Engineering/prompts/main_prompt.txt)) fue diseñado aplicando buenas prácticas de desarrollo en IA:
 
 1. **Aprendizaje en Contexto con Ejemplos (*Few-Shot In-Context Learning*)**: Se incorporan ejemplos reales representativos de entrada y respuesta esperada en español. Esto delimita el tono empático, la categorización cerrada (`Facturación`, `Técnico`, `Cuenta`, `Envíos`, `General`) y el esquema JSON sin necesidad de realizar un ajuste fino (*fine-tuning*) del modelo.
-2. **Justificación del Análisis (`rationale`)**: Exigir al modelo un campo obligatorio de explicación previa/simultánea (`rationale`) incrementa la precisión en la clasificación y asegura la auditaría de las decisiones tomadas por la IA.
+2. **Justificación del Análisis (`rationale`)**: Exigir al modelo un campo obligatorio de explicación previa/simultánea (`rationale`) incrementa la precisión en la clasificación y asegura la auditoría de las decisiones tomadas por la IA.
 3. **Parámetros Deterministas**: Configuración de `temperature=0.2` para minimizar la aleatoriedad, reducir drásticamente el riesgo de alucinaciones y garantizar respuestas consistentes entre ejecuciones.
 
 ---
@@ -81,7 +81,24 @@ El sistema registra tres métricas operativas clave por cada consulta en `metric
 
 ---
 
-## 5. Pruebas Automatizadas (Suite de Test Unitarios)
+## 5. Frontend Interactivo del Operador de Soporte (`app.py`)
+
+Para ir más allá de un simple script de consola y ofrecer una experiencia de usuario completa y lista para producción, se desarrolló un **Dashboard Web Interactivo en Streamlit** ([app.py](file:///c:/Users/power/.gemini/antigravity/brain/Henry_Engineering/app.py)):
+
+### Características del Frontend
+* **Diseño Orientado al Agente Humano**: Interfaz limpia en español donde el operador de soporte introduce consultas de clientes o selecciona ejemplos preconfigurados.
+* **Visualización de Respuesta & Acciones Recomendadas**: Muestra de forma clara la categoría asignada, la respuesta empática sugerida y la lista de acciones a seguir por el equipo.
+* **Inspector de JSON & Métricas en Tiempo Real**: Panel lateral e inspector desplegable con los KPIs exactos de cada consulta (`request_id`, latencia en ms, consumo de tokens, costo en USD) y el payload JSON estructurado devuelto.
+* **Histórico de Telemetría**: Tabla interactiva con el registro histórico de métricas guardadas en el sistema.
+
+### Modos de Ejecución para Evaluación
+El evaluador puede poner a prueba el proyecto mediante dos alternativas simples:
+1. **Modo Web Interactivo (Recomendado):** `streamlit run app.py`
+2. **Modo Consola (CLI):** `python -m src.run_query --query "Tu consulta aquí"`
+
+---
+
+## 6. Pruebas Automatizadas (Suite de Test Unitarios)
 
 El proyecto cuenta con una suite completa de pruebas unitarias automatizadas ([tests/test_core.py](file:///c:/Users/power/.gemini/antigravity/brain/Henry_Engineering/tests/test_core.py)) ejecutadas con `pytest`. Cobertura del **100% (6 de 6 pruebas aprobadas)**:
 
@@ -94,7 +111,7 @@ El proyecto cuenta con una suite completa de pruebas unitarias automatizadas ([t
 
 ---
 
-## 6. Conclusión y Trabajo Futuro
+## 7. Conclusión y Trabajo Futuro
 
 El prototipo cumple holgadamente con todos los requerimientos técnicos y funcionales exigidos por el programa de **Henry AI Engineering (Módulo 1)**.
 
