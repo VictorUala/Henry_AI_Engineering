@@ -8,36 +8,36 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel, Field
 
-# Local imports
+# Importaciones locales de módulos del proyecto
 from src.safety import check_prompt_safety, check_response_safety
 from src.metrics_logger import log_execution_metrics
 
-# Load environment variables
+# Cargar variables de entorno desde el archivo .env
 load_dotenv()
 
-# Pydantic schema for output contract validation
+# Esquema Pydantic para la validación estricta del contrato de salida JSON
 class SupportResponseSchema(BaseModel):
-    category: str = Field(description="Category of the ticket: Facturación, Técnico, Cuenta, Envíos, General")
-    answer: str = Field(description="Direct, helpful answer to the customer inquiry in Spanish")
-    confidence: float = Field(ge=0.0, le=1.0, description="Confidence score between 0.0 and 1.0")
-    rationale: str = Field(description="Brief explanation of decision reasoning")
-    actions: list[str] = Field(description="Recommended downstream actions")
+    category: str = Field(description="Categoría del ticket: Facturación, Técnico, Cuenta, Envíos, General")
+    answer: str = Field(description="Respuesta directa, útil y empática en español")
+    confidence: float = Field(ge=0.0, le=1.0, description="Puntaje de confianza flotante entre 0.0 y 1.0")
+    rationale: str = Field(description="Breve explicación del razonamiento de la decisión")
+    actions: list[str] = Field(description="Lista de acciones recomendadas a seguir")
 
 def load_prompt_template(filepath: str = "prompts/main_prompt.txt") -> str:
-    """Reads system prompt template from file."""
+    """Carga la plantilla del prompt del sistema desde el archivo indicado."""
     if not os.path.exists(filepath):
-        # Fallback default system prompt if file missing
-        return "You are a customer support assistant. Respond ONLY in valid JSON with keys: category, answer, confidence, rationale, actions."
+        # Prompt por defecto en caso de que no exista el archivo
+        return "Sos un asistente de soporte al cliente. Respondé ÚNICAMENTE en JSON válido con las claves: category, answer, confidence, rationale, actions."
     with open(filepath, "r", encoding="utf-8") as f:
         return f.read()
 
 def process_customer_query(query: str, model: str = "gpt-4o-mini", temperature: float = 0.2) -> Dict[str, Any]:
     """
-    Main pipeline: Safety Check -> Prompting -> API Call -> JSON Validation -> Metrics Logging
+    Pipeline principal: Filtro de Seguridad ➔ Inyección de Prompt ➔ Llamada a API OpenAI ➔ Validación JSON ➔ Registro de Métricas
     """
     start_time = time.time()
     
-    # 1. Safety & Security Check (Bonus Guardrail)
+    # 1. Chequeo de Seguridad Proactivo (Guardia de Entrada contra Jailbreaks y PII)
     is_safe, fallback_response = check_prompt_safety(query)
     if not is_safe:
         latency_ms = (time.time() - start_time) * 1000
@@ -54,12 +54,12 @@ def process_customer_query(query: str, model: str = "gpt-4o-mini", temperature: 
             "metrics": metrics
         }
         
-    # 2. Verify API Key & Initialize Client with Timeout and Retries Backoff
+    # 2. Verificación de API Key e Inicialización del Cliente OpenAI con Timeout y Reintentos
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
-        raise ValueError("OPENAI_API_KEY environment variable is not set. Please check your .env file.")
+        raise ValueError("La variable de entorno OPENAI_API_KEY no está configurada. Por favor verifica tu archivo .env.")
         
-    # Configure production resilience: explicit 15s timeout and 3 retries backoff
+    # Configuración de resiliencia en producción: timeout explícito de 15s y 3 reintentos con backoff
     client = OpenAI(
         api_key=api_key,
         timeout=15.0,
@@ -69,10 +69,10 @@ def process_customer_query(query: str, model: str = "gpt-4o-mini", temperature: 
     
     messages = [
         {"role": "system", "content": system_prompt},
-        {"role": "user", "content": f"Customer Inquiry: {query}"}
+        {"role": "user", "content": f"Consulta del Cliente: {query}"}
     ]
     
-    # 3. Call OpenAI API with Structured JSON enforcement
+    # 3. Llamada a la API de OpenAI con formato JSON forzado
     response = client.chat.completions.create(
         model=model,
         messages=messages,
@@ -85,7 +85,7 @@ def process_customer_query(query: str, model: str = "gpt-4o-mini", temperature: 
     raw_content = response.choices[0].message.content
     usage = response.usage
     
-    # 4. Reactive Output Guardrail Check (Safety & Privacy Leak Filter)
+    # 4. Chequeo de Seguridad Reactivo (Filtro de Salida contra credenciales o PII)
     is_response_safe, sanitized_content = check_response_safety(raw_content)
     if not is_response_safe:
         raw_content = json.dumps({
@@ -96,16 +96,16 @@ def process_customer_query(query: str, model: str = "gpt-4o-mini", temperature: 
             "actions": ["Sanitizar salida", "Loguear incidente de seguridad de salida"]
         })
     
-    # 5. Parse & Validate JSON output
+    # 5. Parseo y Validación Estricta del Contrato JSON
     try:
         data_dict = json.loads(raw_content)
         validated = SupportResponseSchema(**data_dict)
         final_data = validated.model_dump()
     except Exception as e:
-        print(f"⚠️ Validation Warning: Output schema parsing error ({e}). Returning raw parsed dict.")
+        print(f"⚠️ Advertencia de Validación: Error al parsear el esquema ({e}). Retornando diccionario crudo.")
         final_data = json.loads(raw_content) if raw_content.startswith("{") else {"raw_response": raw_content}
         
-    # 5. Log metrics
+    # 6. Registrar Métricas y Telemetría en metrics.json
     metrics = log_execution_metrics(
         query=query,
         model=model,
@@ -121,8 +121,8 @@ def process_customer_query(query: str, model: str = "gpt-4o-mini", temperature: 
     }
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Multitasking Customer Support Text Utility")
-    parser.add_argument("--query", type=str, default="How do I change my billing address for upcoming invoices?", help="Customer inquiry text")
+    parser = argparse.ArgumentParser(description="Utilidad CLI de Atención al Cliente con IA Multitarea")
+    parser.add_argument("--query", type=str, default="¿Cómo puedo cambiar mi dirección de facturación para las próximas facturas?", help="Texto de la consulta del cliente")
     args = parser.parse_args()
     
     result = process_customer_query(args.query)
