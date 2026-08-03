@@ -5,12 +5,12 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any
 
-# gpt-4o-mini Pricing per 1M tokens (USD) as of 2026
+# Precios oficiales de gpt-4o-mini por millón de tokens (USD)
 COST_PER_1M_INPUT_TOKENS = 0.150
 COST_PER_1M_OUTPUT_TOKENS = 0.600
 
 def calculate_estimated_cost(prompt_tokens: int, completion_tokens: int) -> float:
-    """Calculate estimated cost in USD for gpt-4o-mini."""
+    """Calcula el costo financiero estimado en USD para gpt-4o-mini."""
     input_cost = (prompt_tokens / 1_000_000) * COST_PER_1M_INPUT_TOKENS
     output_cost = (completion_tokens / 1_000_000) * COST_PER_1M_OUTPUT_TOKENS
     return round(input_cost + output_cost, 6)
@@ -24,7 +24,7 @@ def log_execution_metrics(
     metrics_file_path: str = "metrics/metrics.json"
 ) -> Dict[str, Any]:
     """
-    Logs per-execution metrics (tokens, latency, cost, request_id) into JSON file.
+    Registra las métricas por ejecución (tokens, latencia, costo, request_id) en el archivo JSON.
     """
     total_tokens = prompt_tokens + completion_tokens
     estimated_cost_usd = calculate_estimated_cost(prompt_tokens, completion_tokens)
@@ -42,7 +42,7 @@ def log_execution_metrics(
         "estimated_cost_usd": estimated_cost_usd
     }
     
-    # Persist to metrics.json
+    # Persistir registro en metrics/metrics.json
     try:
         if os.path.exists(metrics_file_path):
             with open(metrics_file_path, "r", encoding="utf-8") as f:
@@ -59,6 +59,6 @@ def log_execution_metrics(
             json.dump(data, f, indent=2, ensure_ascii=False)
             
     except Exception as e:
-        print(f"⚠️ Warning: Failed to persist metrics: {e}")
+        print(f"⚠️ Advertencia: No se pudo guardar el registro de métricas: {e}")
         
     return metric_entry
