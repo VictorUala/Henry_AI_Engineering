@@ -26,6 +26,7 @@ Consola / Interfaz Web (app.py)                                       Registro d
 * **Selección del Modelo (`gpt-4o-mini`)**: Elegido por su equilibrio óptimo entre razonamiento, latencia sub-segundo y costo extremadamente bajo ($0.150 USD por millón de tokens de prompt / $0.600 USD por millón de tokens de completitud).
 * **Contrato JSON Estricto**: Garantizado mediante la propiedad `response_format={"type": "json_object"}` en la llamada a la API y validado en tiempo de ejecución con modelos de `Pydantic`.
 * **Resiliencia de Producción**: Configuración de **timeout explícito de 15 segundos** y un mecanismo de **3 reintentos con backoff exponencial** para mitigar picos de latencia o caídas temporales de red.
+* **Microservicio REST de Moderación Desacoplado (FastAPI + Uvicorn)**: Para llevar la arquitectura a estándares enterprise de desacoplamiento, se desarrolló un microservicio independiente (`moderation_service/`) utilizando **FastAPI** y **Uvicorn** con clasificadores Mock deterministas, umbrales configurables (`config.json`), jerarquía de decisión ($\mathbf{BLOCK > FLAG > ALLOW}$) e historial anonimizado sin PII (hashing SHA-256), permitiendo la interoperabilidad multi-lenguaje.
 * **Observabilidad y Control de Costos**: Cada ejecución registra en tiempo real la latencia en milisegundos, el consumo de tokens y el costo calculado en USD en `metrics/metrics.json`.
 
 ---
