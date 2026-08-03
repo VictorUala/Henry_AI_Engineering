@@ -17,6 +17,7 @@ Desarrollado como Proyecto Integrador del Módulo 1 para la carrera de **AI Engi
 - 🧠 **Prompting con In-Context Learning & Validación**: Utiliza **Few-Shot Prompting** en español con validación estricta de esquemas Pydantic y campo de explicación (`rationale`) para garantizar alta precisión y explicabilidad.
 - 📊 **Logging de Métricas y Trazabilidad**: Registra latencia (`ms`), recuento de tokens, costo estimado (`USD`) y un identificador único `request_id` en `metrics/metrics.json`.
 - 🛡️ **Filtro de Seguridad y Mitigación de Sesgos**: Intercepta inyecciones de prompt (jailbreaks), patrones sesgados/adversariales y filtración de datos sensibles (PII) antes de llamar a la API de OpenAI.
+- ⚙️ **Middleware de Moderación con Mock (Arquitectura Avanzada)**: Servicio independiente (`moderation_service/`) con FastAPI, clasificador mock determinista, umbrales configurables (`config.json`) y trazabilidad anonimizada.
 - 🧪 **Suite de Pruebas Automatizadas**: Cobertura completa con `pytest` para validación de esquemas JSON, cálculo de costos y guardias de seguridad.
 
 ---
@@ -31,7 +32,7 @@ Desarrollado como Proyecto Integrador del Módulo 1 para la carrera de **AI Engi
 ├── requirements.txt          # Dependencias del proyecto Python
 ├── app.py                    # Interfaz Web Interactiva con Streamlit
 ├── prompts/
-│   └── main_prompt.txt       # Plantilla de prompt (Few-shot + Chain-of-thought)
+│   └── main_prompt.txt       # Plantilla de prompt (Few-shot + In-Context Learning)
 ├── metrics/
 │   └── metrics.json          # Registro persistente de métricas y telemetría
 ├── src/
@@ -39,6 +40,11 @@ Desarrollado como Proyecto Integrador del Módulo 1 para la carrera de **AI Engi
 │   ├── run_query.py          # Script ejecutable principal vía CLI
 │   ├── metrics_logger.py     # Módulo de registro de tokens, costos y request_id
 │   └── safety.py             # Filtro de seguridad (Guardia de entrada y salida)
+├── moderation_service/       # Microservicio REST de Moderación Avanzada (Clase)
+│   ├── main.py               # Servidor FastAPI con endpoint /moderate
+│   ├── config.json           # Umbrales configurables (allow, flag, block)
+│   ├── test_middleware.py    # Pruebas automatizadas con Mock determinista
+│   └── logs.jsonl            # Logs estructurados seguros (sin PII, SHA-256)
 ├── tests/
 │   ├── __init__.py
 │   └── test_core.py          # Suite de pruebas unitarias con Pytest
