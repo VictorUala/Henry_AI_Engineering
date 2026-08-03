@@ -14,7 +14,7 @@ Desarrollado como Proyecto Integrador del Módulo 1 para la carrera de **AI Engi
 
 - 📩 **Salida JSON Estructurada**: Garantiza respuestas en formato JSON estricto con los campos `category`, `answer`, `confidence`, `rationale` y `actions`.
 - 🌐 **Dashboard Web Interactivo**: Interfaz amigable en Streamlit (`app.py`) para probar consultas en vivo y examinar la telemetría en tiempo real.
-- 🧠 **Prompting Few-Shot + Chain-of-Thought (CoT)**: Utiliza plantillas de ingeniería de prompts localizadas en español para asegurar alta precisión y explicabilidad.
+- 🧠 **Prompting Few-Shot con Validación**: Utiliza plantillas de ingeniería de prompts localizadas en español con validación de esquema y ejemplos de alta precisión.
 - 📊 **Logging de Métricas y Trazabilidad**: Registra latencia (`ms`), recuento de tokens, costo estimado (`USD`) y un identificador único `request_id` en `metrics/metrics.json`.
 - 🛡️ **Filtro de Seguridad Adversarial (Bonus)**: Intercepta inyecciones de prompt y datos sensibles antes de realizar la llamada a la API de OpenAI.
 - 🧪 **Suite de Pruebas Automatizadas**: Cobertura completa con `pytest` para validación de esquemas JSON, cálculo de costos y guardias de seguridad.
