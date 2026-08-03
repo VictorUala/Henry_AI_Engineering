@@ -22,3 +22,6 @@ Thumbs.db
 
 # Output / temporary test files
 *.log
+sandbox.py
+raw_http_test.py
+
