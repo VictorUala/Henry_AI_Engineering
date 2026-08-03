@@ -16,7 +16,7 @@ Desarrollado como Proyecto Integrador del Módulo 1 para la carrera de **AI Engi
 - 🌐 **Dashboard Web Interactivo**: Interfaz amigable en Streamlit (`app.py`) para probar consultas en vivo y examinar la telemetría en tiempo real.
 - 🧠 **Prompting con In-Context Learning & Validación**: Utiliza **Few-Shot Prompting** en español con validación estricta de esquemas Pydantic y campo de explicación (`rationale`) para garantizar alta precisión y explicabilidad.
 - 📊 **Logging de Métricas y Trazabilidad**: Registra latencia (`ms`), recuento de tokens, costo estimado (`USD`) y un identificador único `request_id` en `metrics/metrics.json`.
-- 🛡️ **Filtro de Seguridad Adversarial (Bonus)**: Intercepta inyecciones de prompt y datos sensibles antes de realizar la llamada a la API de OpenAI.
+- 🛡️ **Filtro de Seguridad y Mitigación de Sesgos**: Intercepta inyecciones de prompt (jailbreaks), patrones sesgados/adversariales y filtración de datos sensibles (PII) antes de llamar a la API de OpenAI.
 - 🧪 **Suite de Pruebas Automatizadas**: Cobertura completa con `pytest` para validación de esquemas JSON, cálculo de costos y guardias de seguridad.
 
 ---
